@@ -54,10 +54,12 @@ describe("our first suite", () => {
       .should("contain", "checked");
   });
 
-  it("assert property", () => {
+  it.only("assert property", () => {
     cy.visit("/");
     cy.contains("Forms").click();
     cy.contains("Datepicker").click();
+
+    let date;
 
     cy.contains("nb-card", "Common Datepicker")
       .find("input")
@@ -91,7 +93,7 @@ describe("our first suite", () => {
       });
   });
 
-  it.only("checkboxes", () => {
+  it("checkboxes", () => {
     cy.visit("/");
     cy.contains("Modal & Overlays").click();
     cy.contains("Toastr").click();
