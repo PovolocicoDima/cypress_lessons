@@ -54,7 +54,7 @@ describe("our first suite", () => {
       .should("contain", "checked");
   });
 
-  it.only("assert property", () => {
+  it("assert property", () => {
     cy.visit("/");
     cy.contains("Forms").click();
     cy.contains("Datepicker").click();
@@ -100,5 +100,97 @@ describe("our first suite", () => {
 
     cy.get('[type="checkbox"]').first().uncheck({ force: true });
     cy.get('[type="checkbox"]').first().should("not.be.checked");
+  });
+
+  it("lists and dropdowns", () => {
+    cy.visit("/");
+
+    // 1
+    // cy.get("nb-select").click();
+    // cy.get(".options-list").contains("Dark").click();
+    // cy.get("nb-select").should("contain", "Dark");
+    // cy.get("nb-layout-header nav").should(
+    //   "have.css",
+    //   "background-color",
+    //   "rgb(34, 43, 69)"
+    // );
+
+    // 2
+    cy.get("nav nb-select").then((dropdown) => {
+      cy.wrap(dropdown).click();
+      cy.get(".options-list nb-option").each((listItem, index) => {
+        const itemText = listItem.text().trim();
+
+        const colors = {
+          Light: "rgb(255, 255, 255)",
+          Dark: "rgb(34, 43, 69)",
+          Cosmic: "rgb(50, 50, 89)",
+          Corporate: "rgb(255, 255, 255)",
+        };
+
+        cy.wrap(listItem).click();
+        cy.wrap(dropdown).should("contain", itemText);
+        cy.get("nb-layout-header nav").should(
+          "have.css",
+          "background-color",
+          colors[itemText]
+        );
+        if (index < Object.keys(colors).length - 1) {
+          cy.wrap(dropdown).click();
+        }
+      });
+    });
+  });
+
+  it.only("web tables", () => {
+    cy.visit("/");
+    cy.contains("Tables & Data").click();
+    cy.contains("Smart Table").click();
+
+    // 1
+    cy.get("tbody")
+      .contains("tr", "Larry")
+      .then((tableRow) => {
+        cy.wrap(tableRow).find(".nb-edit").click();
+        cy.wrap(tableRow).find('[placeholder="Age"]').clear().type("25");
+        cy.wrap(tableRow).find(".nb-checkmark").click();
+        cy.wrap(tableRow).find("td").eq(6).should("contain", "25");
+      });
+
+    // 2
+
+    cy.get("thead").find(".nb-plus").click();
+    cy.get("thead")
+      .find("tr")
+      .eq(2)
+      .then((tableRow) => {
+        cy.wrap(tableRow).find('[placeholder="First Name"]').type("Dima");
+        cy.wrap(tableRow).find('[placeholder="Last Name"]').type("Povo");
+        cy.wrap(tableRow).find(".nb-checkmark").click();
+      });
+
+    cy.get("tbody tr")
+      .first()
+      .find("td")
+      .then((tableColumn) => {
+        cy.wrap(tableColumn).eq(2).should("contain", "Dima");
+        cy.wrap(tableColumn).eq(3).should("contain", "Povo");
+      });
+
+    // 3
+
+    const ages = [20, 30, 40, 200];
+
+    cy.wrap(ages).each((age) => {
+      cy.get("thead [placeholder='Age']").clear().type(age);
+      cy.wait(500);
+      cy.get("tbody tr").each((tableRow) => {
+        if (age === 200) {
+          cy.wrap(tableRow).should("contain", "No data found");
+        } else {
+          cy.wrap(tableRow).find("td").last().should("contain", age);
+        }
+      });
+    });
   });
 });
